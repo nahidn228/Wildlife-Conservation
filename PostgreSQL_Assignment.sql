@@ -92,14 +92,14 @@ INSERT INTO rangers (name, region) VALUES ('Derek Fox', 'Coastal Plains');
 
 
 
- -- (Problem 6) Update all species discovered before year 1800 to have status 'Historic'.
+ -- (Problem 7) Update all species discovered before year 1800 to have status 'Historic'.
 
 SELECT * FROM species WHERE EXTRACT(YEAR FROM discovery_date) < 1800;
 UPDATE species SET conservation_status = 'Historic' WHERE  EXTRACT(YEAR FROM discovery_date) < 1800 ;
 
 
 
- -- (Problem 7) Label each sighting's time of day as 'Morning', 'Afternoon', or 'Evening'.
+ -- (Problem 8) Label each sighting's time of day as 'Morning', 'Afternoon', or 'Evening'.
 
  SELECT sighting_time::TIME AS time_of_day FROM sightings ;
 
@@ -109,5 +109,8 @@ SELECT sighting_id, case
   WHEN sighting_time::TIME BETWEEN  '17:00:00'  AND '20:59:59' THEN 'Evening'
 END AS time_of_day FROM sightings
 
+ -- (Problem 9) Delete rangers who have never sighted any species
 
+SELECT DISTINCT ranger_id FROM sightings
 
+DELETE FROM rangers WHERE ranger_id NOT IN (SELECT DISTINCT ranger_id FROM sightings);
