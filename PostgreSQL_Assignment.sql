@@ -84,11 +84,30 @@ INSERT INTO rangers (name, region) VALUES ('Derek Fox', 'Coastal Plains');
 
 
  -- (Problem 6) Show the most recent 2 sightings.
-  SELECT * FROM species; 
- SELECT * FROM sightings; 
- SELECT * FROM rangers;
 
  SELECT sp.common_name, s.sighting_time,r.name AS name FROM sightings AS s 
  INNER JOIN species AS sp ON sp.species_id = s.species_id
  INNER JOIN rangers AS r ON r.ranger_id = s.ranger_id  
  ORDER BY s.sighting_time DESC  LIMIT 2;
+
+
+
+ -- (Problem 6) Update all species discovered before year 1800 to have status 'Historic'.
+
+SELECT * FROM species WHERE EXTRACT(YEAR FROM discovery_date) < 1800;
+UPDATE species SET conservation_status = 'Historic' WHERE  EXTRACT(YEAR FROM discovery_date) < 1800 ;
+
+
+
+ -- (Problem 7) Label each sighting's time of day as 'Morning', 'Afternoon', or 'Evening'.
+
+ SELECT sighting_time::TIME AS time_of_day FROM sightings ;
+
+SELECT sighting_id, case 
+  WHEN sighting_time::TIME BETWEEN '05:00:00' AND '11:59:59' THEN 'Morning'
+  WHEN sighting_time::TIME BETWEEN  '12:00:00' AND '16:59:59' THEN 'Afternoon'
+  WHEN sighting_time::TIME BETWEEN  '17:00:00'  AND '20:59:59' THEN 'Evening'
+END AS time_of_day FROM sightings
+
+
+
