@@ -1,5 +1,5 @@
--- Active: 1747405680009@@127.0.0.1@5432@conservation_db
-CREATE DATABASE conservation_db;
+-- Active: 1747405680009@@127.0.0.1@5432@wildlife_conservation
+CREATE DATABASE wildlife_conservation;
 
 CREATE TABLE rangers(
   ranger_id SERIAL PRIMARY KEY,
@@ -19,65 +19,76 @@ CREATE TABLE species(
 
 CREATE  TABLE sightings(
   sighting_id SERIAL PRIMARY KEY,
-  ranger_id INT REFERENCES rangers(ranger_id) ,
-  species_id INT REFERENCES species(species_id),
+  ranger_id INT,
+  species_id INT,
   sighting_time TIMESTAMP,
   location VARCHAR(50) NOT NULL,
-  notes TEXT
+  notes TEXT,
+  FOREIGN KEY (ranger_id) REFERENCES rangers(ranger_id),
+  FOREIGN KEY (species_id) REFERENCES species(species_id)
 )
 
-DELETE FROM rangers;
-DROP TABLE rangers;
+
+
 
 INSERT INTO rangers (name, region) VALUES
-('David Black', 'Coastal Forest'),
-('Eva Stone', 'Savannah Plains'),
-('Frank Moore', 'Desert Fringe'),
-('Grace Lee', 'Wetland Reserve'),
-('Henry Clark', 'Tropical Highlands'),
-('Isla Adams', 'Rainforest Zone'),
-('Jack Turner', 'Glacier Bay'),
-('Kara Bell', 'Volcanic Ridge');
+('Alice Green', 'Northern Hills'),
+('Bob White', 'River Delta'),
+('Carol King', 'Mountain Range');
 
+ INSERT INTO species(common_name, scientific_name, discovery_date,conservation_status) VALUES
+ ('Snow Leopard', 'Panthera uncia', '1775-01-01 00:00:00', 'Endangered'),
+ ('Bengal Tiger', 'Panthera tigris', '1758-01-01 00:00:00', 'Endangered'),
+ ('Red Panda', 'Ailurus fulgens', '1825-01-01 00:00:00', 'Vulnerable'),
+ ('Asiatic Elephant', 'Elephas maximus indicus', '1758-01-01 00:00:00', 'Endangered');
 
-INSERT INTO species (common_name, scientific_name, discovery_date, conservation_status) VALUES
-('Snow Leopard', 'Panthera uncia', '1775-01-01', 'Endangered'),
-('African Elephant', 'Loxodonta africana', '1797-01-01', 'Vulnerable'),
-('Bald Eagle', 'Haliaeetus leucocephalus', '1766-01-01', 'Least Concern'),
-('Giant Panda', 'Ailuropoda melanoleuca', '1869-01-01', 'Vulnerable'),
-('Siberian Tiger', 'Panthera tigris altaica', '1929-01-01', 'Endangered'),
-('Blue Whale', 'Balaenoptera musculus', '1758-01-01', 'Endangered'),
-('Red Panda', 'Ailurus fulgens', '1825-01-01', 'Endangered'),
-('Komodo Dragon', 'Varanus komodoensis', '1912-01-01', 'Vulnerable'),
-('Amur Leopard', 'Panthera pardus orientalis', '1857-01-01', 'Critically Endangered'),
-('Green Sea Turtle', 'Chelonia mydas', '1758-01-01', 'Endangered');
-
-
-INSERT INTO sightings (ranger_id, species_id, location, sighting_time, notes) VALUES
-(22, 2, 'Peak Ridge', '2024-05-10 07:45:00', 'Camera trap image captured'),
-(21, 1, 'River Bend', '2024-05-11 14:30:00', 'Tracks found near water'),
-(26, 6,'Forest Edge', '2024-05-12 06:15:00', 'Fresh scat observed'),
-(23, 3,'Highland Trail', '2024-05-13 18:50:00', 'Heard distant calls'),
-(27, 7,'Lake View', '2024-05-14 09:05:00', 'Animal seen drinking from lake'),
-(24, 4,'North Slope', '2024-05-15 20:20:00', 'Thermal image recorded'),
-(22, 8,'Southern Marsh', '2024-05-16 05:40:00', 'Bird nest spotted in tree'),
-(25, 5,'Dry Creek', '2024-05-17 16:10:00', 'Dust prints near stream bed');
+ INSERT INTO sightings (ranger_id, species_id, location, sighting_time, notes) VALUES
+(1, 1, 'Peak Ridge', '2024-05-10 07:45:00', 'Camera trap image captured'),
+(2, 2, 'Bankwood Area', '2024-05-12 16:20:00', 'Juvenile seen'),
+(3, 3, 'Bamboo Grove East', '2024-05-15 09:10:00', 'Feeding observed'),
+(2, 1, 'Snowfall Pass', '2024-05-18 18:30:00', NULL)
 
 
 
 
-DROP TABLE sightings;
-DELETE FROM sightings;
 
-
-
-SELECT * FROM sightings;
 SELECT * FROM rangers;
 SELECT * FROM species;
+SELECT * FROM sightings;
 
 
 
+--(Problem 1) Register a new ranger with provided data with name = 'Derek Fox' and region = 'Coastal Plains' 
+
+INSERT INTO rangers (name, region) VALUES ('Derek Fox', 'Coastal Plains');
+
+ -- (Problem 2) Count unique species ever sighted.
+ SELECT  COUNT( DISTINCT common_name) AS unique_species_sighted  FROM species;
+
+
+  -- (Problem 3) Find all sightings where the location includes "Pass".
+  SELECT * FROM  sightings WHERE location ILIKE '%pass%' ; -- case insensitive
+  SELECT * FROM  sightings WHERE location LIKE '%Pass%' ; -- case sensitive
 
 
 
+ -- (Problem 4) List each ranger's name and their total number of sightings.
+ SELECT r.name, COUNT(s.sighting_id) AS total_sightings FROM sightings  AS s JOIN rangers AS r ON r.ranger_id = s.ranger_id GROUP BY r.name;
 
+
+ -- (Problem 5) List species that have never been sighted..
+
+ SELECT species.common_name  AS common_name FROM species  JOIN sightings ON  species.species_id = sightings.sighting_id  WHERE NOT(species.species_id = sightings.species_id );
+ 
+
+
+
+ -- (Problem 6) Show the most recent 2 sightings.
+  SELECT * FROM species; 
+ SELECT * FROM sightings; 
+ SELECT * FROM rangers;
+
+ SELECT sp.common_name, s.sighting_time,r.name AS name FROM sightings AS s 
+ INNER JOIN species AS sp ON sp.species_id = s.species_id
+ INNER JOIN rangers AS r ON r.ranger_id = s.ranger_id  
+ ORDER BY s.sighting_time DESC  LIMIT 2;
